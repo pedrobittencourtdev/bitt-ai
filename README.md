@@ -22,3 +22,32 @@ Siga os passos abaixo para rodar o Bitt.ai na sua máquina:
 
 ### 1. Clone o repositório
 ```bash
+git clone https://github.com/pedrobittencourtdev/bitt-ai.git
+cd bitt-ai
+
+### 2. Instale as dependências
+
+* Certifique-se de ter o Python instalado. É recomendado usar um ambiente virtual (venv).
+
+```bash
+pip install streamlit google-generativeai python-dotenv
+
+### 3. Configure a sua Chave de API
+
+***Crie uma chave de API gratuita no Google AI Studio.***
+
+***Na raiz do projeto, crie um arquivo chamado .env (não esqueça do ponto).***
+
+***Adicione a sua chave dentro do arquivo neste formato (sem aspas)***
+
+```bash
+GEMINI_API_KEY=sua_chave_api_aqui
+
+### 4. Rode a aplicação
+```bash
+streamlit run main.py
+
+***O projeto abrirá automaticamente no seu navegador padrão.***
+
+```bash
+Desenvolvido por Pedro Bittencourt.
