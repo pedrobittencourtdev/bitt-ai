@@ -51,7 +51,7 @@ with st.sidebar:
         st.rerun() # Atualiza a página imediatamente
 
 # Titulo
-st.title("✨ Bitt.ai")
+st.title("🦉 Bitt.ai")
 st.caption("Seu assistente virtual inteligente")
 
 # Cria a lista de mensagens se ela não existir
