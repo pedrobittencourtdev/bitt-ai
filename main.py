@@ -3,6 +3,34 @@ import google.generativeai as genai
 import os
 from dotenv import load_dotenv
 
+st.set_page_config(
+    page_title="Bitt.ai",
+    page_icon="🤖",
+    layout="centered" # Altere para "wide" se quiser que o chat ocupe a tela toda
+)
+
+# --- OCULTANDO ELEMENTOS PADRÃO DO STREAMLIT COM CSS ---
+estilo_customizado = """
+<style>
+    /* Oculta o menu de hambúrguer superior */
+    #MainMenu {visibility: hidden;}
+    
+    /* Oculta o rodapé "Made with Streamlit" */
+    footer {visibility: hidden;}
+    
+    /* Oculta o espaço em branco no topo da página */
+    header {visibility: hidden;}
+    
+    /* Exemplo: Mudando a cor do chat input */
+    .stChatInputContainer {
+        border-radius: 15px;
+    }
+</style>
+"""
+
+# O comando markdown com unsafe_allow_html=True permite que o CSS funcione
+st.markdown(estilo_customizado, unsafe_allow_html=True)
+
 load_dotenv()
 
 #1. Configuração do Gemini (Cole a chave que você pegou no Google AI Studio)
@@ -12,7 +40,19 @@ genai.configure(api_key=chave_secreta)
 
 modelo_ia = genai.GenerativeModel("gemini-2.5-flash")
 
-st.title("Bitt.ai")
+with st.sidebar:
+    st.image("https://cdn-icons-png.flaticon.com/512/4712/4712027.png", width=100) # Exemplo de logo
+    st.header("⚙️ Configurações")
+    st.write("Bem-vindo ao painel do Bitt.ai.")
+    
+    # Botão super útil para limpar o histórico
+    if st.button("🗑️ Limpar Conversa"):
+        st.session_state["lista_mensagens"] = []
+        st.rerun() # Atualiza a página imediatamente
+
+# Titulo
+st.title("✨ Bitt.ai")
+st.caption("Seu assistente virtual inteligente")
 
 # Cria a lista de mensagens se ela não existir
 if not "lista_mensagens" in st.session_state:
