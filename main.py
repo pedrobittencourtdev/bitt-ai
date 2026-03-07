@@ -18,9 +18,6 @@ estilo_customizado = """
     /* Oculta o rodapé "Made with Streamlit" */
     footer {visibility: hidden;}
     
-    /* Oculta o espaço em branco no topo da página */
-    header {visibility: hidden;}
-    
     /* Exemplo: Mudando a cor do chat input */
     .stChatInputContainer {
         border-radius: 15px;
