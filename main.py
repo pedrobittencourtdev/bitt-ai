@@ -11,30 +11,54 @@ st.set_page_config(
 
 # --- OCULTANDO ELEMENTOS PADRÃO DO STREAMLIT COM CSS ---
 
+# --- CSS RESPONSIVO PARA MOBILE (ANDROID/IOS) ---
 estilo_customizado = """
 <style>
-    /* Oculta o menu de hambúrguer (os 3 pontos) e o botão de Deploy */
+    /* 1. Limpeza Geral de Elementos do Streamlit */
     #MainMenu {display: none !important;}
     .stDeployButton {display: none !important;}
-    
-    /* Oculta o rodapé "Made with Streamlit" */
     footer {display: none !important;}
-    
-    /* Oculta a marca d'água "Hosted with Streamlit" no canto inferior */
     .viewerBadge-container {display: none !important;}
+    header {background-color: transparent !important;}
 
-    /* AJUSTE PARA CELULAR: Remove o fundo branco do cabeçalho, mas mantém o botão da sidebar */
-    header {
-        background-color: rgba(0,0,0,0) !important;
-        border-bottom: none !important;
+    /* 2. Ajuste de Espaçamento no Topo (Mobile) */
+    .main .block-container {
+        padding-top: 2rem !important;
+        padding-bottom: 5rem !important;
     }
 
-    /* Arredonda as bordas do chat input e centraliza o texto */
+    /* 3. Estilização da Caixa de Chat (Arredondada e Centralizada) */
     .stChatInputContainer {
-        border-radius: 15px;
+        border-radius: 20px !important;
+        bottom: 20px !important; /* Levanta um pouco a barra no iOS */
     }
     .stChatInput textarea {
-        text-align: center;
+        text-align: center !important;
+        font-size: 16px !important; /* Evita o zoom automático do iPhone ao clicar */
+    }
+
+    /* 4. MEDIA QUERY: Ajustes exclusivos para telas pequenas (Celulares) */
+    @media (max-width: 640px) {
+        /* Reduz o tamanho da fonte do título no celular */
+        h1 {
+            font-size: 1.8rem !important;
+        }
+        /* Ajusta a largura das mensagens para não ficarem muito estreitas */
+        .stChatMessage {
+            padding: 10px !important;
+            margin-bottom: 10px !important;
+        }
+        /* Centraliza melhor a logo da barra lateral no mobile */
+        [data-testid="stSidebar"] img {
+            max-width: 80px !important;
+        }
+    }
+
+    /* 5. Efeito Visual nas Mensagens */
+    [data-testid="stChatMessage"] {
+        border-radius: 15px;
+        background-color: rgba(255, 255, 255, 0.05); /* Um fundo sutil */
+        margin-bottom: 15px;
     }
 </style>
 """
