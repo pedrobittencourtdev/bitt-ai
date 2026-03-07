@@ -4,13 +4,18 @@ import os
 from dotenv import load_dotenv
 import datetime
 
+# ─────────────────────────────────────────────
+#  CONFIGURAÇÃO DA PÁGINA
+# ─────────────────────────────────────────────
 st.set_page_config(
     page_title="Bitt.ai",
     page_icon="🦉",
-    layout="centered" # Altere para "wide" se quiser que o chat ocupe a tela toda
+    layout="centered"
 )
 
-# --- OCULTANDO ELEMENTOS PADRÃO DO STREAMLIT COM CSS ---
+# ─────────────────────────────────────────────
+#  CSS CUSTOMIZADO
+# ─────────────────────────────────────────────
 estilo_customizado = """
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
@@ -138,6 +143,9 @@ estilo_customizado = """
 """
 st.markdown(estilo_customizado, unsafe_allow_html=True)
 
+# ─────────────────────────────────────────────
+#  VARIÁVEIS E CONFIGURAÇÕES
+# ─────────────────────────────────────────────
 load_dotenv()
 
 SYSTEM_PROMPT = """Você é Bitt.ai, um assistente virtual corporativo de alta performance.
@@ -154,6 +162,9 @@ Diretrizes de comportamento:
 
 Você representa excelência profissional em cada interação."""
 
+# ─────────────────────────────────────────────
+#  INICIALIZAÇÃO DA API
+# ─────────────────────────────────────────────
 chave_secreta = os.getenv("GEMINI_API_KEY")
 api_configurada = False
 
@@ -177,7 +188,7 @@ if "total_interacoes" not in st.session_state:
     st.session_state["total_interacoes"] = 0
 
 if "sessao_inicio" not in st.session_state:
-    st.session_state["sessao_inicio"] = datetime.now().strftime("%d/%m/%Y %H:%M")
+    st.session_state["sessao_inicio"] = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
 
 # ─────────────────────────────────────────────
 #  SIDEBAR
@@ -204,7 +215,7 @@ with st.sidebar:
     if st.button("🗑️ Limpar Conversa"):
         st.session_state["lista_mensagens"] = []
         st.session_state["total_interacoes"] = 0
-        st.session_state["sessao_inicio"] = datetime.now().strftime("%d/%m/%Y %H:%M")
+        st.session_state["sessao_inicio"] = datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
         st.rerun()
 
     # Exportar conversa
@@ -219,7 +230,7 @@ with st.sidebar:
         st.download_button(
             label="📥 Exportar Conversa (.txt)",
             data=conteudo_export.encode("utf-8"),
-            file_name=f"bitt_ai_{datetime.now().strftime('%Y%m%d_%H%M')}.txt",
+            file_name=f"bitt_ai_{datetime.datetime.now().strftime('%Y%m%d_%H%M')}.txt",
             mime="text/plain"
         )
 
