@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 st.set_page_config(
     page_title="Bitt.ai",
-    page_icon="🤖",
+    page_icon="🦉",
     layout="centered" # Altere para "wide" se quiser que o chat ocupe a tela toda
 )
 
@@ -41,7 +41,7 @@ genai.configure(api_key=chave_secreta)
 modelo_ia = genai.GenerativeModel("gemini-2.5-flash")
 
 with st.sidebar:
-    st.image("https://cdn-icons-png.flaticon.com/512/4712/4712027.png", width=100) # Exemplo de logo
+    st.image("https://cdn-icons-png.flaticon.com/512/4712/4712027.png", width=100) #logo
     st.header("⚙️ Configurações")
     st.write("Bem-vindo ao painel do Bitt.ai.")
     
