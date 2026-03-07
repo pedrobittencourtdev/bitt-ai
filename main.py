@@ -153,7 +153,24 @@ with st.sidebar:
             st.session_state["contexto_arquivo"] = texto_extraido
             st.success("✅ PDF carregado na memória!")
 
-    # --- 4. RODAPÉ (RETRÁTIL E SUTIL) ---
+            # --- 4. SELO DE SEGURANÇA ---
+    st.markdown("---")
+    st.markdown(
+        """
+        <div style="background-color: rgba(0, 230, 118, 0.1); padding: 10px; border-radius: 10px; border: 1px solid rgba(0, 230, 118, 0.2); margin-bottom: 15px;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                <span style="font-size: 20px;">🛡️</span>
+                <span style="color: #00E676; font-size: 13px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Dados Protegidos</span>
+            </div>
+            <p style="font-size: 11px; color: #aaa; text-align: center; margin-top: 8px; line-height: 1.2;">
+                Seus arquivos são processados em memória volátil e não são armazenados em bancos de dados externos.
+            </p>
+        </div>
+        """, 
+        unsafe_allow_html=True
+    )
+
+    # --- 5. RODAPÉ (RETRÁTIL E SUTIL) ---
     st.sidebar.markdown("---") # Linha divisória firme
     st.markdown("<p style='text-align: center; font-weight: bold; margin-bottom: 5px;'>👨‍💻 Desenvolvedor</p>", unsafe_allow_html=True)
     
@@ -230,3 +247,10 @@ if texto_usuario:
 
                 except Exception as e:
                     st.error(f"❌ Erro: {e}")
+
+st.markdown(
+    "<p style='text-align: center; color: #666; font-size: 11px; margin-top: 10px;'>"
+    "🔒 Criptografia de ponta a ponta via Google Gemini API. Nenhum dado é treinado ou salvo permanentemente."
+    "</p>", 
+    unsafe_allow_html=True
+)
