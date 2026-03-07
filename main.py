@@ -82,7 +82,7 @@ if chave_secreta:
     api_configurada = True
     genai.configure(api_key=chave_secreta)
     # Modelo atualizado e estável
-    modelo_ia = genai.GenerativeModel("gemini-1.5-flash")
+    modelo_ia = genai.GenerativeModel("gemini-2.5-flash")
 else:
     api_configurada = False
     
