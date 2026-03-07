@@ -18,9 +18,14 @@ estilo_customizado = """
     /* Oculta o rodapé "Made with Streamlit" */
     footer {visibility: hidden;}
     
-    /* Exemplo: Mudando a cor do chat input */
+    /* Arredonda as bordas do chat input */
     .stChatInputContainer {
         border-radius: 15px;
+    }
+    
+    /* Centraliza o texto (placeholder e o que o usuário digita) */
+    .stChatInput textarea {
+        text-align: center;
     }
 </style>
 """
@@ -40,21 +45,30 @@ else:
     api_configurada = False
     
 with st.sidebar:
-    st.image("https://cdn-icons-png.flaticon.com/512/4712/4712027.png", width=100) #logo
-    st.header("⚙️ Configurações")
-    st.write("Bem-vindo ao painel do Bitt.ai.")
+    st.markdown(
+        """
+        <div style="display: flex; justify-content: center;">
+            <img src="https://cdn-icons-png.flaticon.com/512/4712/4712027.png" width="100">
+        </div>
+        """, 
+        unsafe_allow_html=True
+    )
+   # --- TEXTOS CENTRALIZADOS COM HTML ---
+    st.markdown("<h2 style='text-align: center;'>⚙️ Configurações</h2>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center;'>Bem-vindo ao painel do Bitt.ai.</p>", unsafe_allow_html=True)
     
-    # Botão super útil para limpar o histórico
-    if st.button("🗑️ Limpar Conversa"):
+    # --- BOTÃO SIMÉTRICO (Ocupa a largura toda) ---
+    if st.button("🗑️ Limpar chat", use_container_width=True):
         st.session_state["lista_mensagens"] = []
-        st.rerun() # Atualiza a página imediatamente
+        st.rerun()
 
     st.divider() # Cria uma linha separadora bem sutil
     st.markdown("<div style='text-align: center;'><small>Desenvolvido por <a href='https://github.com/pedrobittencourtdev' target='_blank' style='color: #00E676; text-decoration: none;'>Pedro Bittencourt</a></small></div>", unsafe_allow_html=True)
 
 # Titulo
-st.title("🦉 Bitt.ai")
-st.caption("Assistente Corporativo · Profissional · Preciso")
+# --- TÍTULO E SUBTÍTULO CENTRALIZADOS NA PÁGINA PRINCIPAL ---
+st.markdown("<h1 style='text-align: center;'>🦉 Bitt.ai</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #a5a5a5; font-size: 14px;'>Assistente Corporativo · Profissional · Preciso</p>", unsafe_allow_html=True)
 
 # Cria a lista de mensagens se ela não existir
 if not "lista_mensagens" in st.session_state:
