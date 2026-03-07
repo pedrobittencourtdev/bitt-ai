@@ -73,7 +73,7 @@ chave_secreta = os.getenv("GEMINI_API_KEY")
 if chave_secreta:
     api_configurada = True
     genai.configure(api_key=chave_secreta)
-    modelo_ia = genai.GenerativeModel("gemini-2.5-flash")
+    modelo_ia = genai.GenerativeModel("gemini-pro")
 else:
     api_configurada = False
     
