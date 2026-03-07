@@ -12,18 +12,130 @@ st.set_page_config(
 # --- OCULTANDO ELEMENTOS PADRÃO DO STREAMLIT COM CSS ---
 estilo_customizado = """
 <style>
-    /* Oculta o menu de hambúrguer superior */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+    /* Reset geral */
+    html, body, [class*="css"] {
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* Fundo principal */
+    .stApp {
+        background-color: #0f1117;
+    }
+
+    /* Oculta elementos padrão */
     #MainMenu {visibility: hidden;}
-    
-    /* Oculta o rodapé "Made with Streamlit" */
     footer {visibility: hidden;}
-    
-    /* Exemplo: Mudando a cor do chat input */
+    header {visibility: hidden;}
+
+    /* Título */
+    h1 {
+        color: #e8eaf0 !important;
+        font-weight: 600 !important;
+        letter-spacing: -0.5px;
+    }
+
+    /* Caption */
+    .stApp p.caption, div[data-testid="stCaptionContainer"] p {
+        color: #6b7280 !important;
+        font-size: 0.85rem !important;
+    }
+
+    /* Sidebar */
+    section[data-testid="stSidebar"] {
+        background-color: #161b27 !important;
+        border-right: 1px solid #1f2937;
+    }
+    section[data-testid="stSidebar"] * {
+        color: #c9d1e0 !important;
+    }
+
+    /* Botões na sidebar */
+    section[data-testid="stSidebar"] button {
+        background-color: #1f2937 !important;
+        border: 1px solid #374151 !important;
+        color: #e5e7eb !important;
+        border-radius: 8px !important;
+        width: 100%;
+        transition: background-color 0.2s;
+    }
+    section[data-testid="stSidebar"] button:hover {
+        background-color: #374151 !important;
+    }
+
+    /* Balão do usuário */
+    div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-user"]) {
+        background-color: #1a2236 !important;
+        border: 1px solid #1f3050 !important;
+        border-radius: 12px !important;
+        padding: 12px 16px !important;
+        margin-bottom: 8px;
+    }
+
+    /* Balão do assistente */
+    div[data-testid="stChatMessage"]:has(div[data-testid="chatAvatarIcon-assistant"]) {
+        background-color: #111827 !important;
+        border: 1px solid #1f2937 !important;
+        border-radius: 12px !important;
+        padding: 12px 16px !important;
+        margin-bottom: 8px;
+    }
+
+    /* Texto das mensagens */
+    div[data-testid="stChatMessage"] p {
+        color: #d1d5db !important;
+        line-height: 1.65 !important;
+        font-size: 0.95rem !important;
+    }
+
+    /* Input de chat */
     .stChatInputContainer {
-        border-radius: 15px;
+        background-color: #161b27 !important;
+        border: 1px solid #374151 !important;
+        border-radius: 12px !important;
+    }
+    .stChatInputContainer textarea {
+        color: #e5e7eb !important;
+        background-color: transparent !important;
+    }
+    .stChatInputContainer textarea::placeholder {
+        color: #4b5563 !important;
+    }
+
+    /* Divisor */
+    hr {
+        border-color: #1f2937 !important;
+    }
+
+    /* Métricas */
+    div[data-testid="stMetric"] {
+        background-color: #1a2236;
+        border: 1px solid #1f2937;
+        border-radius: 8px;
+        padding: 10px 14px;
+    }
+    div[data-testid="stMetric"] label {
+        color: #6b7280 !important;
+        font-size: 0.75rem !important;
+    }
+    div[data-testid="stMetric"] div {
+        color: #e5e7eb !important;
+        font-size: 1.1rem !important;
+        font-weight: 600 !important;
+    }
+
+    /* Download button */
+    a[data-testid="stDownloadButton"] button {
+        background-color: #1f2937 !important;
+        border: 1px solid #374151 !important;
+        color: #e5e7eb !important;
+        border-radius: 8px !important;
+        width: 100%;
     }
 </style>
 """
+st.markdown(estilo_customizado, unsafe_allow_html=True)
 
 # O comando markdown com unsafe_allow_html=True permite que o CSS funcione
 st.markdown(estilo_customizado, unsafe_allow_html=True)
