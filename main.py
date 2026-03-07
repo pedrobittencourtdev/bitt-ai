@@ -12,11 +12,12 @@ st.set_page_config(
 # --- OCULTANDO ELEMENTOS PADRÃO DO STREAMLIT COM CSS ---
 estilo_customizado = """
 <style>
-    /* Oculta o menu de hambúrguer superior */
+    /* Oculta o menu superior padrão e o botão de deploy */
     #MainMenu {visibility: hidden;}
+    .stDeployButton {display: none;}
     
-    /* Oculta o rodapé "Made with Streamlit" */
-    footer {visibility: hidden;}
+   /* Oculta o rodapé "Made with Streamlit" DEFINITIVAMENTE */
+    footer {display: none !important;}
     
     /* Arredonda as bordas do chat input */
     .stChatInputContainer {
