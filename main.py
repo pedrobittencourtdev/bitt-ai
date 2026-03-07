@@ -68,24 +68,26 @@ st.markdown(estilo_customizado, unsafe_allow_html=True)
 
 load_dotenv()
 
-# 1. Configuração do Gemini (Cole a chave que você pegou no Google AI Studio)
 # 1. Tenta pegar a chave do Segredo (Nuvem) ou do .env (Local)
-if "GEMINI_API_KEY" in st.secrets:
-    chave_secreta = st.secrets["GEMINI_API_KEY"]
-elif os.getenv("GEMINI_API_KEY"):
-    chave_secreta = os.getenv("GEMINI_API_KEY")
-else:
-    chave_secreta = None
+# Tenta carregar a chave de forma segura
+try:
+    if "GEMINI_API_KEY" in st.secrets:
+        chave_secreta = st.secrets["GEMINI_API_KEY"]
+    else:
+        chave_secreta = os.getenv("GEMINI_API_KEY")
+except Exception:
+    # Se der erro de SecretNotFoundError, tenta o env ou fica None
+    chave_secreta = os.getenv("GEMINI_API_KEY", None)
 
-# 2. Configura a IA se a chave existir
 if chave_secreta:
-    api_configurada = True
     genai.configure(api_key=chave_secreta)
-    # Modelo atualizado e estável
     modelo_ia = genai.GenerativeModel("gemini-2.5-flash")
+    api_configurada = True
 else:
+    st.error("⚠️ Erro: Chave de API não encontrada. Verifique o secrets.toml ou o arquivo .env")
     api_configurada = False
-    
+
+
 with st.sidebar:
     st.markdown(
         """
