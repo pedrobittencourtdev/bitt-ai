@@ -10,7 +10,8 @@ import datetime
 st.set_page_config(
     page_title="Bitt.ai",
     page_icon="🦉",
-    layout="centered"
+    layout="centered",
+    initial_sidebar_state="expanded"
 )
 
 # ─────────────────────────────────────────────
@@ -33,7 +34,10 @@ estilo_customizado = """
     /* Oculta elementos padrão */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
-    header {visibility: hidden;}
+
+    [data-testid="stToolbar"] {visibility: hidden;}
+    [data-testid="stDecoration"] {display: none;}
+    [data-testid="stStatusWidget"] {visibility: hidden;}
 
     /* Título */
     h1 {
