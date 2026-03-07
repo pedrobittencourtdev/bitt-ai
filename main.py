@@ -10,21 +10,29 @@ st.set_page_config(
 )
 
 # --- OCULTANDO ELEMENTOS PADRÃO DO STREAMLIT COM CSS ---
+
 estilo_customizado = """
 <style>
-    /* Oculta o menu superior padrão e o botão de deploy */
-    #MainMenu {visibility: hidden;}
-    .stDeployButton {display: none;}
+    /* Oculta o menu de hambúrguer (os 3 pontos) e o botão de Deploy */
+    #MainMenu {display: none !important;}
+    .stDeployButton {display: none !important;}
     
-   /* Oculta o rodapé "Made with Streamlit" DEFINITIVAMENTE */
+    /* Oculta o rodapé "Made with Streamlit" */
     footer {display: none !important;}
     
-    /* Arredonda as bordas do chat input */
+    /* Oculta a marca d'água "Hosted with Streamlit" no canto inferior */
+    .viewerBadge-container {display: none !important;}
+
+    /* AJUSTE PARA CELULAR: Remove o fundo branco do cabeçalho, mas mantém o botão da sidebar */
+    header {
+        background-color: rgba(0,0,0,0) !important;
+        border-bottom: none !important;
+    }
+
+    /* Arredonda as bordas do chat input e centraliza o texto */
     .stChatInputContainer {
         border-radius: 15px;
     }
-    
-    /* Centraliza o texto (placeholder e o que o usuário digita) */
     .stChatInput textarea {
         text-align: center;
     }
