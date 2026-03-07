@@ -137,8 +137,6 @@ estilo_customizado = """
 """
 st.markdown(estilo_customizado, unsafe_allow_html=True)
 
-# O comando markdown com unsafe_allow_html=True permite que o CSS funcione
-st.markdown(estilo_customizado, unsafe_allow_html=True)
 
 load_dotenv()
 
