@@ -29,15 +29,18 @@ def configurar_ia():
     load_dotenv(caminho_env)
     
     chave_secreta = None
+    # Tentativa segura de ler segredos sem travar o app
     try:
-        # Tenta pegar do secrets ou env
-        chave_secreta = st.secrets.get("GEMINI_API_KEY") or os.getenv("GEMINI_API_KEY")
+        if hasattr(st, "secrets") and "GEMINI_API_KEY" in st.secrets:
+            chave_secreta = st.secrets["GEMINI_API_KEY"]
     except:
+        pass
+
+    if not chave_secreta:
         chave_secreta = os.getenv("GEMINI_API_KEY")
 
     if chave_secreta:
         genai.configure(api_key=chave_secreta.strip())
-        # gemini-2.5-flash ou 1.5-flash (dependendo da sua cota)
         return genai.GenerativeModel("gemini-2.5-flash"), True
     
     return None, False
@@ -46,8 +49,7 @@ def extrair_texto_pdf(arquivo):
     try:
         leitor = PyPDF2.PdfReader(arquivo)
         return "".join([pagina.extract_text() for pagina in leitor.pages])
-    except:
-        return "Erro ao ler o PDF."
+    except: return ""
 
 # ==========================================
 # 3. COMPONENTES DA INTERFACE (SIDEBAR)
@@ -57,45 +59,46 @@ def renderizar_sidebar():
         st.markdown("<h1 style='font-size: 24px;'>Funções do Bitt.ai</h1>", unsafe_allow_html=True)
         st.divider()
 
+        if "uploader_key" not in st.session_state:
+            st.session_state.uploader_key = 0
+
+        # --- FERRAMENTAS ---
         with st.expander("⚙️ Ferramentas", expanded=False):
-            if st.button("🗑️ Limpar Chat", use_container_width=True, key="btn_limpar_unico"):
+            if st.button("🗑️ Limpar Conversa", use_container_width=True):
                 st.session_state.lista_mensagens = []
-                st.session_state.pop("contexto_arquivo", None)
-                st.session_state.pop("contexto_imagem", None)
+                st.session_state.pop("temp_pdf", None)
+                st.session_state.pop("temp_img", None)
                 st.rerun()
 
         # --- PDF ---
-        pdf_aberto = "contexto_arquivo" in st.session_state
-        with st.expander("📁 Analisar PDF", expanded=pdf_aberto):
-            arq_pdf = st.file_uploader("Subir PDF", type="pdf", key="up_pdf", label_visibility="collapsed")
+        with st.expander("📁 Analisar PDF", expanded=False):
+            arq_pdf = st.file_uploader("Subir PDF", type="pdf", key=f"pdf_{st.session_state.uploader_key}", label_visibility="collapsed")
             if arq_pdf:
-                st.session_state["contexto_arquivo"] = extrair_texto_pdf(arq_pdf)
+                st.session_state["temp_pdf"] = extrair_texto_pdf(arq_pdf)
                 st.success("✅ PDF pronto!")
 
         # --- IMAGEM ---
-        img_aberta = "contexto_imagem" in st.session_state
-        with st.expander("🖼️ Analisar Imagem", expanded=img_aberta):
-            arq_img = st.file_uploader("Subir Imagem", type=["png","jpg","jpeg"], key="up_img", label_visibility="collapsed")
+        with st.expander("🖼️ Analisar Imagem", expanded=False):
+            arq_img = st.file_uploader("Subir Imagem", type=["png","jpg","jpeg"], key=f"img_{st.session_state.uploader_key}", label_visibility="collapsed")
             if arq_img:
-                # Otimização para Android: Reduzir tamanho na memória
-                imagem = Image.open(arq_img)
-                if imagem.width > 1600:
-                    imagem.thumbnail((1600, 1600))
-                st.image(imagem, use_container_width=True)
-                st.session_state["contexto_imagem"] = imagem
+                img = Image.open(arq_img)
+                if img.width > 1200: img.thumbnail((1200, 1200))
+                st.session_state["temp_img"] = img
+                st.image(img, use_container_width=True)
                 st.success("✅ Imagem pronta!")
 
-        st.markdown("---")
+        # --- PARTE DE SEGURANÇA ---
         st.markdown("""
             <div style="background-color: rgba(0, 230, 118, 0.1); padding: 12px; border-radius: 12px; border: 1px solid rgba(0, 230, 118, 0.2); margin-bottom: 15px;">
                 <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
                     <span style="font-size: 18px;">🛡️</span>
                     <span style="color: #00E676; font-size: 12px; font-weight: bold; text-transform: uppercase;">Dados Protegidos</span>
                 </div>
-                <p style="font-size: 11px; color: #aaa; text-align: center; margin-top: 8px;">Processamento em memória volátil.</p>
+                <p style="font-size: 11px; color: #aaa; text-align: center; margin-top: 8px;">Processamento em memória volátil. Arquivos não são armazenados permanentemente.</p>
             </div>
             """, unsafe_allow_html=True)
 
+        # --- CRÉDITOS ---
         st.divider()
         st.markdown("<p style='text-align: center; font-weight: bold;'>👨‍💻 Desenvolvedor</p>", unsafe_allow_html=True)
         st.markdown(f"""
@@ -110,10 +113,9 @@ def renderizar_sidebar():
 # ==========================================
 def main():
     st.set_page_config(page_title="Bitt.ai", page_icon="🦉", layout="centered")
-    
     if "lista_mensagens" not in st.session_state:
         st.session_state.lista_mensagens = []
-
+    
     aplicar_estilos()
     renderizar_sidebar()
     modelo_ia, api_ok = configurar_ia()
@@ -126,52 +128,49 @@ def main():
         role = "assistant" if msg["role"] == "model" else "user"
         st.chat_message(role).write(msg["content"])
 
-    # Entrada do Usuário
     if prompt_user := st.chat_input("Como posso ajudar?"):
-        if not api_ok:
-            st.error("⚠️ Erro: Chave de API não detectada.")
-            return
+        if not api_ok: return st.error("⚠️ Erro: Chave de API não configurada corretamente.")
 
         st.chat_message("user").write(prompt_user)
         
-        # Montagem do Contexto (Arquivos + Memória)
-        contexto_com_memoria = []
-        
-        # 1. Adiciona Arquivos atuais (se houver)
-        if "contexto_arquivo" in st.session_state:
-            contexto_com_memoria.append(f"CONTEXTO DO PDF: {st.session_state.contexto_arquivo}")
-        if "contexto_imagem" in st.session_state:
-            contexto_com_memoria.append(st.session_state.contexto_imagem)
+        # Montagem do Contexto
+        contexto_envio = []
+        for m in st.session_state.lista_mensagens[-6:]:
+            contexto_envio.append(f"{m['role']}: {m['content']}")
 
-        # 2. Adiciona as últimas 6 mensagens do histórico (Memória de Chat)
-        for msg in st.session_state.lista_mensagens[-6:]:
-            prefixo = "Usuário: " if msg["role"] == "user" else "IA: "
-            contexto_com_memoria.append(prefixo + msg["content"])
+        # Agrega arquivos temporários ao prompt desta rodada
+        prompt_final = prompt_user
+        if "temp_pdf" in st.session_state:
+            prompt_final += f"\n\n[Contexto do PDF anexado]: {st.session_state.temp_pdf}"
+        if "temp_img" in st.session_state:
+            contexto_envio.append(st.session_state.temp_img) # Imagem como objeto multimídia
 
-        # 3. Adiciona a pergunta atual
-        contexto_com_memoria.append(prompt_user)
+        contexto_envio.append(f"user: {prompt_final}")
         st.session_state.lista_mensagens.append({"role": "user", "content": prompt_user})
 
         with st.chat_message("assistant"):
-            with st.spinner("Pensando..."):
+            
+            placeholder = st.empty()
+            with st.spinner("Bitt.ai está processando..."):
                 try:
-                    stream = modelo_ia.generate_content(contexto_com_memoria, stream=True)
+                    # 1. Envia para a IA
+                    stream = modelo_ia.generate_content(contexto_envio, stream=True)
+                    
+                    # 2. Renderiza a resposta com efeito de digitação
                     texto_final = st.write_stream(chunk.text for chunk in stream if chunk.text)
+                    
+                    # 3. Salva no histórico
                     st.session_state.lista_mensagens.append({"role": "model", "content": texto_final})
                     
-                    # --- LIMPEZA PÓS-ENVIO ---
-                    # Removemos o arquivo da memória mas mantemos a conversa no histórico!
-                    st.session_state.pop("contexto_arquivo", None)
-                    st.session_state.pop("contexto_imagem", None)
-                    
-                    # Rerun para limpar o uploader visualmente e liberar RAM no Android
-                    st.rerun()
-
+                    # 4. LIMPEZA (Apenas após a IA terminar de escrever tudo)
+                    if "temp_pdf" in st.session_state or "temp_img" in st.session_state:
+                        st.session_state.pop("temp_pdf", None)
+                        st.session_state.pop("temp_img", None)
+                        st.session_state.uploader_key += 1 
+                        st.rerun() 
+                
                 except Exception as e:
-                    if "429" in str(e):
-                        st.error("🛑 Cota gratuita esgotada. Aguarde um minuto.")
-                    else:
-                        st.error(f"Erro na IA: {e}")
+                    st.error(f"Erro na IA: {e}")
 
 if __name__ == "__main__":
     main()
