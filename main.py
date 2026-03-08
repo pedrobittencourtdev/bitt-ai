@@ -30,23 +30,24 @@ def configurar_ia():
     
     chave_secreta = None
     try:
-        if "GEMINI_API_KEY" in st.secrets:
-            chave_secreta = st.secrets["GEMINI_API_KEY"]
-        else:
-            chave_secreta = os.getenv("GEMINI_API_KEY")
+        # Tenta pegar do secrets ou env
+        chave_secreta = st.secrets.get("GEMINI_API_KEY") or os.getenv("GEMINI_API_KEY")
     except:
         chave_secreta = os.getenv("GEMINI_API_KEY")
 
     if chave_secreta:
         genai.configure(api_key=chave_secreta.strip())
-        # Usando 1.5-flash para garantir que a cota gratuita funcione
+        # gemini-2.5-flash ou 1.5-flash (dependendo da sua cota)
         return genai.GenerativeModel("gemini-2.5-flash"), True
     
     return None, False
 
 def extrair_texto_pdf(arquivo):
-    leitor = PyPDF2.PdfReader(arquivo)
-    return "".join([pagina.extract_text() for pagina in leitor.pages])
+    try:
+        leitor = PyPDF2.PdfReader(arquivo)
+        return "".join([pagina.extract_text() for pagina in leitor.pages])
+    except:
+        return "Erro ao ler o PDF."
 
 # ==========================================
 # 3. COMPONENTES DA INTERFACE (SIDEBAR)
@@ -63,6 +64,7 @@ def renderizar_sidebar():
                 st.session_state.pop("contexto_imagem", None)
                 st.rerun()
 
+        # --- PDF ---
         pdf_aberto = "contexto_arquivo" in st.session_state
         with st.expander("📁 Analisar PDF", expanded=pdf_aberto):
             arq_pdf = st.file_uploader("Subir PDF", type="pdf", key="up_pdf", label_visibility="collapsed")
@@ -70,16 +72,19 @@ def renderizar_sidebar():
                 st.session_state["contexto_arquivo"] = extrair_texto_pdf(arq_pdf)
                 st.success("✅ PDF pronto!")
 
+        # --- IMAGEM ---
         img_aberta = "contexto_imagem" in st.session_state
         with st.expander("🖼️ Analisar Imagem", expanded=img_aberta):
             arq_img = st.file_uploader("Subir Imagem", type=["png","jpg","jpeg"], key="up_img", label_visibility="collapsed")
             if arq_img:
+                # Otimização para Android: Reduzir tamanho na memória
                 imagem = Image.open(arq_img)
+                if imagem.width > 1600:
+                    imagem.thumbnail((1600, 1600))
                 st.image(imagem, use_container_width=True)
                 st.session_state["contexto_imagem"] = imagem
                 st.success("✅ Imagem pronta!")
 
-        # --- PARTE DE SEGURANÇA (DENTRO DA SIDEBAR) ---
         st.markdown("---")
         st.markdown("""
             <div style="background-color: rgba(0, 230, 118, 0.1); padding: 12px; border-radius: 12px; border: 1px solid rgba(0, 230, 118, 0.2); margin-bottom: 15px;">
@@ -106,7 +111,6 @@ def renderizar_sidebar():
 def main():
     st.set_page_config(page_title="Bitt.ai", page_icon="🦉", layout="centered")
     
-    # Inicializa o estado das mensagens antes de qualquer coisa
     if "lista_mensagens" not in st.session_state:
         st.session_state.lista_mensagens = []
 
@@ -125,22 +129,26 @@ def main():
     # Entrada do Usuário
     if prompt_user := st.chat_input("Como posso ajudar?"):
         if not api_ok:
-            st.error("⚠️ Erro: Chive de API não detectada.")
+            st.error("⚠️ Erro: Chave de API não detectada.")
             return
 
         st.chat_message("user").write(prompt_user)
         
+        # Montagem do Contexto (Arquivos + Memória)
         contexto_com_memoria = []
+        
+        # 1. Adiciona Arquivos atuais (se houver)
         if "contexto_arquivo" in st.session_state:
             contexto_com_memoria.append(f"CONTEXTO DO PDF: {st.session_state.contexto_arquivo}")
         if "contexto_imagem" in st.session_state:
             contexto_com_memoria.append(st.session_state.contexto_imagem)
 
-        # Memória: Últimas mensagens
+        # 2. Adiciona as últimas 6 mensagens do histórico (Memória de Chat)
         for msg in st.session_state.lista_mensagens[-6:]:
             prefixo = "Usuário: " if msg["role"] == "user" else "IA: "
             contexto_com_memoria.append(prefixo + msg["content"])
 
+        # 3. Adiciona a pergunta atual
         contexto_com_memoria.append(prompt_user)
         st.session_state.lista_mensagens.append({"role": "user", "content": prompt_user})
 
@@ -150,8 +158,20 @@ def main():
                     stream = modelo_ia.generate_content(contexto_com_memoria, stream=True)
                     texto_final = st.write_stream(chunk.text for chunk in stream if chunk.text)
                     st.session_state.lista_mensagens.append({"role": "model", "content": texto_final})
+                    
+                    # --- LIMPEZA PÓS-ENVIO ---
+                    # Removemos o arquivo da memória mas mantemos a conversa no histórico!
+                    st.session_state.pop("contexto_arquivo", None)
+                    st.session_state.pop("contexto_imagem", None)
+                    
+                    # Rerun para limpar o uploader visualmente e liberar RAM no Android
+                    st.rerun()
+
                 except Exception as e:
-                    st.error(f"Erro na IA: {e}")
+                    if "429" in str(e):
+                        st.error("🛑 Cota gratuita esgotada. Aguarde um minuto.")
+                    else:
+                        st.error(f"Erro na IA: {e}")
 
 if __name__ == "__main__":
     main()
